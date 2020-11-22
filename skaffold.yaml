@@ -1,0 +1,11 @@
+apiVersion: skaffold/v2beta5
+kind: Config
+metadata:
+  name: aws-sqs-operator
+build:
+  artifacts:
+    - image: sbressey/aws-sqs-operator
+deploy:
+  kustomize:
+    paths:
+      - config/default

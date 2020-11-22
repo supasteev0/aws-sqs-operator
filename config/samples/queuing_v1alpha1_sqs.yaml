@@ -1,0 +1,6 @@
+apiVersion: queuing.aws.artifakt.io/v1alpha1
+kind: Sqs
+metadata:
+  name: sqs-test
+spec:
+  region: eu-west-1

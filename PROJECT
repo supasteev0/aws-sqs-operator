@@ -1,0 +1,11 @@
+domain: aws.artifakt.io
+layout: go.kubebuilder.io/v2
+projectName: aws-sqs-operator
+repo: github.com/supasteev0/aws-sqs-operator
+resources:
+- group: queuing
+  kind: Sqs
+  version: v1alpha1
+version: 3-alpha
+plugins:
+  go.sdk.operatorframework.io/v2-alpha: {}

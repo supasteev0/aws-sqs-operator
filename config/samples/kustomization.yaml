@@ -1,0 +1,4 @@
+## Append samples you want in your CSV to this file as resources ##
+resources:
+- queuing_v1alpha1_sqs.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

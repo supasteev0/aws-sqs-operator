@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aws-sqs-operator
+  namespace: default
+  labels:
+    control-plane: aws-sqs-operator
+spec:
+  selector:
+    matchLabels:
+      control-plane: aws-sqs-operator
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        control-plane: aws-sqs-operator
+    spec:
+      serviceAccountName: aws-sqs-operator-manager
+      containers:
+      - command:
+        - /manager
+        args:
+        - --enable-leader-election
+        image: aws-sqs-operator
+        imagePullPolicy: IfNotPresent
+        name: aws-sqs-operator
+        ports:
+          - containerPort: 8080
+            name: metrics
+        resources:
+          limits:
+            cpu: 100m
+            memory: 30Mi
+          requests:
+            cpu: 100m
+            memory: 20Mi
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: aws-secret
+                key: AWS_ACCESS_KEY_ID
+                optional: true
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-secret
+                key: AWS_SECRET_ACCESS_KEY
+                optional: true
+      terminationGracePeriodSeconds: 10

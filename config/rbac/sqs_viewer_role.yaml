@@ -1,0 +1,20 @@
+# permissions for end users to view sqs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: sqs-viewer-role
+rules:
+- apiGroups:
+  - queuing.aws.artifakt.io
+  resources:
+  - sqs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - queuing.aws.artifakt.io
+  resources:
+  - sqs/status
+  verbs:
+  - get
