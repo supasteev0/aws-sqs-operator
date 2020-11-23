@@ -50,6 +50,7 @@ type SqsStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:path=sqs-queues,scope=Cluster
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
+// +kubebuilder:printcolumn:name="Region",type=string,JSONPath=`.spec.region`
 // +kubebuilder:printcolumn:name="URL",type=string,JSONPath=`.status.url`
 // +kubebuilder:printcolumn:name="Messages",type=string,JSONPath=`.status.visibleMessages`
 type Sqs struct {

@@ -12,9 +12,10 @@ The operator will also display the url and number of messages in SQS queues via 
 
 ## Requirements
 
-* Kubernetes server 1.19.x
+* Kubernetes server 1.16.x
 * AWS account with necessary permissions to manage SQS queues
 * Prometheus
+* Kustomize
 
 ## Installation
 
@@ -28,13 +29,19 @@ To deploy the operator, you can use the following command:
 make deploy
 ```
 
-All deployments manifests are managed with kustomize.
+All deployments manifests are managed with kustomize, the base kustomize folder can be found [here](config/default).
+
+You can also deploy the manifests via kustomize and kubectl with teh following command: 
+
+```bash
+$ kustomize build config/default | kubectl apply -f -
+```
 
 ### AWS permissions
 
-To allow the operator to access AWS resources, you should setup [IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
+To allow the operator to access AWS resources, you should create an IAM role with [IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
 
-Here is a sample code to create an IRSA IAM role with Terraform: 
+Here is a sample code to create an IRSA compatible IAM role with Terraform: 
 
 ```hcl-terraform
 resource "aws_iam_role" "sqs-operator" {
@@ -95,7 +102,7 @@ resource "aws_iam_role_policy_attachment" "sqs-operator" {
 
 Don't forget to change the namespace in the role policy condition if you deployed the operator in another namespace.
 
-Once the IAM role has been created, you can add the `eks.amazonaws.com/role-arn` annotation to the `aws-sqs-operator` serviceaccount: 
+Once the IAM role has been created, you can add the `eks.amazonaws.com/role-arn` annotation to the `aws-sqs-operator-manager` serviceaccount: 
 
 ```yaml
   annotations:
@@ -105,13 +112,13 @@ Once the IAM role has been created, you can add the `eks.amazonaws.com/role-arn`
 Example: 
 
 ```bash
-kubectl annotate sa aws-sqs-operator-manager eks.amazonaws.com/role-arn='arn:aws:iam::ACCCOUNT_ID:role/sqs-operator'
+$ kubectl annotate sa aws-sqs-operator-manager eks.amazonaws.com/role-arn='arn:aws:iam::ACCCOUNT_ID:role/sqs-operator'
 ```
 
 If you feel very lazy or if you are testing the operator in a dev environment, you can just use your AWS credentials by creating a secret called `aws-secret` with AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY values: 
 
 ```bash
-kubectl create secret generic aws-secret --from-literal='AWS_ACCESS_KEY_ID=xxxx' \
+$ kubectl create secret generic aws-secret --from-literal='AWS_ACCESS_KEY_ID=xxxx' \
 --from-literal='AWS_SECRET_ACCESS_KEY=xxxx'
 ```
 
@@ -155,12 +162,14 @@ spec:
   maxMessageSize: 2048
 ```
 
+You can find some sample manifests in the [samples](config/samples) folder
+
 ### Posting a message in a queue
 
 Example:
 
 ```bash
-aws sqs send-message --queue-url https://sqs.eu-west-1.amazonaws.com/xxxxxxxxx/my-super-queue --message-body "My super message" --delay-seconds 0
+$ aws sqs send-message --queue-url https://sqs.eu-west-1.amazonaws.com/xxxxxxxxx/my-super-queue --message-body "My super message" --delay-seconds 0
 ```
 
 ### View SQS queues
@@ -193,7 +202,7 @@ This config is used to display extra columns when executing kubectl get command.
 
 ### main.go
 
-main.go is the entrypoint of the application. It has been generated with  the `operator-sdk init` command.
+[main.go](main.go) is the entrypoint of the application. It has been generated with  the `operator-sdk init` command.
 
 Following features were added : 
 
@@ -202,7 +211,7 @@ Following features were added :
 
 ### controller
 
-The sqs controller handles Sqs resources reconciliation.
+The [sqs controller](controllers/sqs_controller.go) handles Sqs resources reconciliation.
 
 Its main goal is to create and delete Sqs resources, as well as updating their Status when an AWS SQS queue is updated.
 
@@ -233,7 +242,7 @@ Default kubernetes controller metrics are exposed as well as a custom metric:
 
 ## CI
 
-A sample .gitlab-ci.yml is provided in this repository as an example to build the project via a CI pipeline in Gitlab.
+A sample [.gitlab-ci.yml](.gitlab-ci.yml) is provided in this repository as an example to build the project via a CI pipeline in Gitlab.
 
 This sample configuration will: 
 
@@ -255,10 +264,10 @@ This sample configuration will:
 Example commands to build and run the operator:
 
 ```bash
-IMG=sbressey/aws-sqs-operator:XXX
-make docker-build
-make docker-push-kind
-make deploy
+$ IMG=sbressey/aws-sqs-operator:XXX
+$ make docker-build
+$ make docker-push-kind
+$ make deploy
 ```
 
 IMG variable must be changed every time in order to make sure kind will use the most recent Docker image. 
@@ -268,3 +277,7 @@ A [skaffold](https://skaffold.dev/) configuration file is also present because I
 I used it at the beginning to push the image to Dockerhub, but, as my bandwidth is limited, I then switched to using kind (awesome tool BTW !).
 
 I haven't configured skaffold to automatically push the image to kind, but it might be possible.  
+
+## Time spent
+
+I have spent around 16 hours to create this operator.

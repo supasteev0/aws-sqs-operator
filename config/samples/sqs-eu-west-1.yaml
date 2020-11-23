@@ -1,6 +1,6 @@
 apiVersion: queuing.aws.artifakt.io/v1alpha1
 kind: Sqs
 metadata:
-  name: sqs-test
+  name: test-ireland
 spec:
   region: eu-west-1

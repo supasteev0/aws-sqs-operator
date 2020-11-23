@@ -1,7 +1,7 @@
 apiVersion: queuing.aws.artifakt.io/v1alpha1
 kind: Sqs
 metadata:
-  name: test2
+  name: test-paris
 spec:
-  region: eu-west-1
+  region: eu-west-3
   maxMessageSize: 2048
